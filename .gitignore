@@ -34,3 +34,5 @@ Thumbs.db
 .idea/
 .idea/*
 *.iml
+
+google_maps_api.xml
