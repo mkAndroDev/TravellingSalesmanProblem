@@ -1,4 +1,4 @@
-package com.krawczyk.maciej.travellingsalesmanproblem.android.activities;
+package com.krawczyk.maciej.travellingsalesmanproblem.android.fragments;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -9,8 +9,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -25,44 +28,56 @@ import com.krawczyk.maciej.travellingsalesmanproblem.R;
 
 import java.util.ArrayList;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private AlertDialog alertDialog;
     private ArrayList<LatLng> points = new ArrayList<>();
 
+    public MapFragment() {
+        // Required empty public constructor
+    }
+
+    public static MapFragment newInstance() {
+        return new MapFragment();
+    }
+
     @Override
-    protected void onStart() {
+    public void onStart() {
         mGoogleApiClient.connect();
         super.onStart();
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = getView();
+        if (view == null) {
+            view = inflater.inflate(R.layout.fragment_map, container, false);
+        }
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
+            mGoogleApiClient = new GoogleApiClient.Builder(getContext())
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
                     .build();
         }
 
-        alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog = new AlertDialog.Builder(getContext()).create();
+
+        return view;
     }
 
     @Override
-    protected void onStop() {
+    public void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
     }
-
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -95,8 +110,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void requestPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                    ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 showAlertDialog("Aby móc pobrać aktualną lokalizację potrzebujemy zgody na dostęp do lokalizacji.",
                         (dialog, which) -> {
                             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -104,7 +119,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         },
                         (dialog, which) -> alertDialog.dismiss(),
                         true);
-                requestPermissions();
+//                requestPermissions();
             } else {
                 setCurrentLocation();
             }
@@ -125,7 +140,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void showAlertDialog(String message, DialogInterface.OnClickListener ok, DialogInterface.OnClickListener cancel, boolean cancelable) {
-
         alertDialog.setMessage(message);
         alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "ok", ok);
         alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, cancel == null ? null : "anuluj", cancel);
