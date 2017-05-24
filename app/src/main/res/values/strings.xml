@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">TravellingSalesmanProblem</string>
+    <string name="app_name">Travelling Salesman Problem</string>
     <string name="title_activity_maps">Map</string>
 </resources>
