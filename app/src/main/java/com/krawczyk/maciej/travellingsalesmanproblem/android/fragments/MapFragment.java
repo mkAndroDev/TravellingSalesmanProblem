@@ -25,6 +25,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.krawczyk.maciej.travellingsalesmanproblem.R;
+import com.krawczyk.maciej.travellingsalesmanproblem.data.MapPoint;
 
 import java.util.ArrayList;
 
@@ -33,7 +34,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private AlertDialog alertDialog;
-    private ArrayList<LatLng> points = new ArrayList<>();
+    private ArrayList<MapPoint> points = new ArrayList<>();
 
     public MapFragment() {
         // Required empty public constructor
@@ -84,7 +85,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         mMap = googleMap;
 
         mMap.setOnMapLongClickListener(latLng -> {
-            points.add(latLng);
+            points.add(new MapPoint(points.size(), "Marker " + points.size(), latLng));
             mMap.addMarker(new MarkerOptions().position(latLng).title(points.size() + " Marker"));
         });
 
@@ -119,7 +120,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                         },
                         (dialog, which) -> alertDialog.dismiss(),
                         true);
-//                requestPermissions();
             } else {
                 setCurrentLocation();
             }
@@ -127,16 +127,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
     }
 
     private void setCurrentLocation() {
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null) {
-            LatLng currentLatLon = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-            mMap.clear();
-            mMap.addMarker(new MarkerOptions().position(currentLatLon).title("Here you are"));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLon, 12.0f));
-            for (LatLng latLng : points) {
-                mMap.addMarker(new MarkerOptions().position(latLng).title(points.indexOf(latLng) + " marker"));
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (mLastLocation != null) {
+                LatLng currentLatLon = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions().position(currentLatLon).title("Here you are"));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLon, 12.0f));
+                for (MapPoint mapPoint : points) {
+                    mMap.addMarker(new MarkerOptions().position(mapPoint.getLatLng()).title(mapPoint.getName()));
+                }
             }
         }
+//        } else {
+//            requestPermissions();
+//        }
     }
 
     public void showAlertDialog(String message, DialogInterface.OnClickListener ok, DialogInterface.OnClickListener cancel, boolean cancelable) {
