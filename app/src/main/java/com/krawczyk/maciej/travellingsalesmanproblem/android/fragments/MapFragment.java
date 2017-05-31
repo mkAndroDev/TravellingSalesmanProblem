@@ -25,6 +25,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.krawczyk.maciej.travellingsalesmanproblem.R;
+import com.krawczyk.maciej.travellingsalesmanproblem.data.MapPoint;
 
 import java.util.ArrayList;
 
@@ -33,7 +34,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private AlertDialog alertDialog;
-    private ArrayList<LatLng> points = new ArrayList<>();
+    private ArrayList<MapPoint> points = new ArrayList<>();
 
     public MapFragment() {
         // Required empty public constructor
@@ -84,8 +85,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         mMap = googleMap;
 
         mMap.setOnMapLongClickListener(latLng -> {
-            points.add(latLng);
-            mMap.addMarker(new MarkerOptions().position(latLng).title(points.size() + " " + getString(R.string.marker_counter_label)));
+            int id = points.size();
+            points.add(new MapPoint(id, id + " " + getString(R.string.marker_counter_label), latLng));
+            mMap.addMarker(new MarkerOptions().position(latLng).title(id + " " + getString(R.string.marker_counter_label)));
         });
 
         LatLng lodz = new LatLng(51.747858, 19.405815);
@@ -107,14 +109,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            setCurrentLocation();
-        }
-    }
-
     public void requestPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             showAlertDialog(getString(R.string.ask_permission_localization_label),
@@ -127,7 +121,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         } else {
             setCurrentLocation();
         }
+    }
 
+    public void showAlertDialog(String message, DialogInterface.OnClickListener ok, DialogInterface.OnClickListener cancel, boolean cancelable) {
+        alertDialog.setMessage(message);
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.dialog_ok), ok);
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, cancel == null ? null : getString(R.string.dialog_cancel), cancel);
+        alertDialog.setCancelable(cancelable);
+        if (!alertDialog.isShowing()) {
+            alertDialog.show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            setCurrentLocation();
+        }
     }
 
     private void setCurrentLocation() {
@@ -139,23 +150,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(currentLatLon).title(getString(R.string.marker_here_you_are_label)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLon, 12.0f));
-                for (LatLng latLng : points) {
-                    mMap.addMarker(new MarkerOptions().position(latLng).title(points.indexOf(latLng)
-                            + " " + getString(R.string.marker_counter_label)));
+                for (MapPoint mapPoint : points) {
+                    mMap.addMarker(new MarkerOptions().position(mapPoint.getLatLng()).title(mapPoint.getName()));
                 }
             }
         } else {
             requestPermissions();
-        }
-    }
-
-    public void showAlertDialog(String message, DialogInterface.OnClickListener ok, DialogInterface.OnClickListener cancel, boolean cancelable) {
-        alertDialog.setMessage(message);
-        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.dialog_ok), ok);
-        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, cancel == null ? null : getString(R.string.dialog_cancel), cancel);
-        alertDialog.setCancelable(cancelable);
-        if (!alertDialog.isShowing()) {
-            alertDialog.show();
         }
     }
 }
