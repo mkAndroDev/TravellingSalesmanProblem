@@ -85,17 +85,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
         mMap.setOnMapLongClickListener(latLng -> {
             points.add(latLng);
-            mMap.addMarker(new MarkerOptions().position(latLng).title(points.size() + " Marker"));
+            mMap.addMarker(new MarkerOptions().position(latLng).title(points.size() + " " + getString(R.string.marker_counter_label)));
         });
 
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng lodz = new LatLng(51.747858, 19.405815);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(lodz));
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        requestPermissions();
+        setCurrentLocation();
     }
 
     @Override
@@ -108,41 +107,52 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
 
     }
 
-    public void requestPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                    ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                showAlertDialog("Aby móc pobrać aktualną lokalizację potrzebujemy zgody na dostęp do lokalizacji.",
-                        (dialog, which) -> {
-                            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-                            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 2);
-                        },
-                        (dialog, which) -> alertDialog.dismiss(),
-                        true);
-//                requestPermissions();
-            } else {
-                setCurrentLocation();
-            }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            setCurrentLocation();
         }
     }
 
+    public void requestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            showAlertDialog(getString(R.string.ask_permission_localization_label),
+                    (dialog, which) -> {
+                        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+                    },
+                    (dialog, which) -> alertDialog.dismiss(),
+                    true);
+        } else {
+            setCurrentLocation();
+        }
+
+    }
+
     private void setCurrentLocation() {
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null) {
-            LatLng currentLatLon = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-            mMap.clear();
-            mMap.addMarker(new MarkerOptions().position(currentLatLon).title("Here you are"));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLon, 12.0f));
-            for (LatLng latLng : points) {
-                mMap.addMarker(new MarkerOptions().position(latLng).title(points.indexOf(latLng) + " marker"));
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (mLastLocation != null) {
+                LatLng currentLatLon = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions().position(currentLatLon).title(getString(R.string.marker_here_you_are_label)));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLon, 12.0f));
+                for (LatLng latLng : points) {
+                    mMap.addMarker(new MarkerOptions().position(latLng).title(points.indexOf(latLng)
+                            + " " + getString(R.string.marker_counter_label)));
+                }
             }
+        } else {
+            requestPermissions();
         }
     }
 
     public void showAlertDialog(String message, DialogInterface.OnClickListener ok, DialogInterface.OnClickListener cancel, boolean cancelable) {
         alertDialog.setMessage(message);
-        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "ok", ok);
-        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, cancel == null ? null : "anuluj", cancel);
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.dialog_ok), ok);
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, cancel == null ? null : getString(R.string.dialog_cancel), cancel);
         alertDialog.setCancelable(cancelable);
         if (!alertDialog.isShowing()) {
             alertDialog.show();

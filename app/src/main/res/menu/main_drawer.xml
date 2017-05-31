@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_clear_map"
+            android:icon="@android:drawable/ic_delete"
+            android:title="@string/menu_clear" />
+        <item
+            android:id="@+id/nav_calculate_route"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="@string/menu_calculate" />
+        <item
+            android:id="@+id/nav_about_author"
+            android:icon="@android:drawable/ic_menu_info_details"
+            android:title="@string/menu_about_author" />
+    </group>
+</menu>
