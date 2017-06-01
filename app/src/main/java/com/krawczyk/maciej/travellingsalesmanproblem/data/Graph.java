@@ -5,7 +5,8 @@ import java.util.ArrayList;
 /**
  * Created by maciek on 30.05.17.
  */
-class Graph {
+public class Graph {
+
     private int edgesCount;
     private int verticesCount;
 //    private List<Integer>[] adjacency;

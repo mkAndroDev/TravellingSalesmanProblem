@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -25,11 +26,13 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.krawczyk.maciej.travellingsalesmanproblem.R;
+import com.krawczyk.maciej.travellingsalesmanproblem.android.activities.MainActivity;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.MapPoint;
 
 import java.util.ArrayList;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, MainActivity.MainActivityListener {
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
@@ -58,6 +61,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
             view = inflater.inflate(R.layout.fragment_map, container, false);
         }
 
+        ((MainActivity) getActivity()).setupMainActivityListener(this);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
@@ -72,6 +77,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
         alertDialog = new AlertDialog.Builder(getContext()).create();
 
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -156,6 +166,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, GoogleA
             }
         } else {
             requestPermissions();
+        }
+    }
+
+    @Override
+    public void onMenuItemClicked(int menuItemId) {
+        switch (menuItemId) {
+            case R.id.nav_clear_map:
+                mMap.clear();
+                break;
+            case R.id.nav_calculate_route:
+                break;
+            default:
+                break;
         }
     }
 }

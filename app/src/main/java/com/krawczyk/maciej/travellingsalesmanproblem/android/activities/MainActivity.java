@@ -16,6 +16,7 @@ import com.krawczyk.maciej.travellingsalesmanproblem.android.fragments.MapFragme
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private MainActivityListener mainActivityListener;
     private DrawerLayout drawer;
 
     @Override
@@ -50,6 +51,10 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void setupMainActivityListener(MainActivityListener listener) {
+        mainActivityListener = listener;
+    }
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -58,8 +63,14 @@ public class MainActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.nav_clear_map:
+                if (mainActivityListener != null) {
+                    mainActivityListener.onMenuItemClicked(R.id.nav_clear_map);
+                }
                 break;
             case R.id.nav_calculate_route:
+                if (mainActivityListener != null) {
+                    mainActivityListener.onMenuItemClicked(R.id.nav_calculate_route);
+                }
                 break;
             case R.id.nav_about_author:
                 break;
@@ -68,5 +79,9 @@ public class MainActivity extends AppCompatActivity
         }
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public interface MainActivityListener {
+        void onMenuItemClicked(int menuItemId);
     }
 }
