@@ -13,6 +13,9 @@ import android.view.MenuItem;
 import com.krawczyk.maciej.travellingsalesmanproblem.R;
 import com.krawczyk.maciej.travellingsalesmanproblem.android.fragments.MapFragment;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -24,12 +27,26 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        setupRealm();
+
+        setupViews();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
         loadFragment(MapFragment.newInstance(), false);
+    }
+
+    private void setupViews() {
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+    }
+
+    private void setupRealm() {
+        RealmConfiguration config = new RealmConfiguration.Builder(this)
+                .name("graphdb.realm")
+                .deleteRealmIfMigrationNeeded()
+                .schemaVersion(1)
+                .build();
+        Realm.setDefaultConfiguration(config);
     }
 
     private void loadFragment(Fragment fragment, boolean addToBacktack) {

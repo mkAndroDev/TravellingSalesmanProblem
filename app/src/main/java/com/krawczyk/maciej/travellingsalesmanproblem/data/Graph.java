@@ -2,64 +2,43 @@ package com.krawczyk.maciej.travellingsalesmanproblem.data;
 
 import java.util.ArrayList;
 
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.RealmClass;
+
 /**
  * Created by maciek on 30.05.17.
  */
-public class Graph {
+@RealmClass
+public class Graph extends RealmObject {
 
-    private int edgesCount;
-    private int verticesCount;
-//    private List<Integer>[] adjacency;
+    private RealmList<GraphPoint> points = new RealmList<>();
 
-    private ArrayList<ArrayList<MapPoint>> adjacency;
-
-    @SuppressWarnings("unchecked")
-    public Graph(int vertices) {
-        this.verticesCount = vertices;
-        this.edgesCount = 0;
-
-        adjacency = new ArrayList<>();
-        for (int i = 0; i < vertices; i++) {
-            adjacency.add(new ArrayList<>());
-        }
+    public Graph() {
+        // Required empty public constructor
     }
 
-    public void addEdge(MapPoint vertexStart, MapPoint vertexEnd) {
-        adjacency.get(vertexStart.getIndex()).add(vertexEnd);
-        adjacency.get(vertexEnd.getIndex()).add(vertexStart);
-        edgesCount++;
+    public RealmList<GraphPoint> getPoints() {
+        return points;
+    }
+
+    public void addEdgesForPoint(MapPoint mapPointStart, ArrayList<MapPoint> endMapPoints, ArrayList<Double> weights) {
+        RealmList<PointAdjacency> adjacencyPoints = new RealmList<>();
+
+        for (int i = 0; i < endMapPoints.size(); i++) {
+            PointAdjacency pointAdjacency = new PointAdjacency(mapPointStart.getLatLng().latitude, mapPointStart.getLatLng().longitude,
+                    endMapPoints.get(i).getLatLng().latitude, endMapPoints.get(i).getLatLng().longitude, weights.get(i));
+            adjacencyPoints.add(pointAdjacency);
+        }
+
+        points.add(new GraphPoint(mapPointStart.getLatLng().latitude, mapPointStart.getLatLng().longitude, adjacencyPoints));
     }
 
     public int getEdgesCount() {
-        return edgesCount;
+        return ((points.size() * (points.size() - 1)) / 2);
     }
 
     public int getVerticesCount() {
-        return verticesCount;
+        return points.size();
     }
-
-    public ArrayList<MapPoint> getAdjacencyOf(MapPoint vertex) {
-        return adjacency.get(vertex.getIndex());
-    }
-
-//    /**
-//     * @return opis grafu.
-//     */
-//    public String toString() {
-//        StringBuilder s = new StringBuilder();
-//        String newLine = System.getProperty("line.separator");
-//        s.append("wierzcholki: ").append(verticesCount).append("; krawedzie: ").append(edgesCount).append(newLine);
-//
-//        for (int i = 0; i < verticesCount; i++) {
-//            s.append(adjacency.get(i)).append(": ");
-//
-//            for (MapPoint mapPoint : adjacency.get(i))
-//
-//            for (int w : adjacency[i]) {
-//                s.append(w).append(" ");
-//            }
-//            s.append(newLine);
-//        }
-//        return s.toString();
-//    }
 }

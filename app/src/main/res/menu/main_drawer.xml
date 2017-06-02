@@ -8,7 +8,7 @@
             android:title="@string/menu_clear" />
         <item
             android:id="@+id/nav_calculate_route"
-            android:icon="@drawable/ic_menu_gallery"
+            android:icon="@android:drawable/ic_menu_add"
             android:title="@string/menu_calculate" />
         <item
             android:id="@+id/nav_about_author"

@@ -12,6 +12,7 @@ public class MapPoint {
     private LatLng latLng;
 
     public MapPoint(int index, String name, LatLng latLng) {
+        this.index = index;
         this.name = name;
         this.latLng = latLng;
     }
@@ -28,4 +29,8 @@ public class MapPoint {
         return latLng;
     }
 
+    @Override
+    public String toString() {
+        return latLng.toString();
+    }
 }
