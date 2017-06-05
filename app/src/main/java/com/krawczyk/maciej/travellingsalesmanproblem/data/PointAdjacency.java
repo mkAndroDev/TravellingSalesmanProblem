@@ -13,9 +13,9 @@ public class PointAdjacency extends RealmObject {
     private double pointStartLon;
     private double pointEndLat;
     private double pointEndLon;
-    private Double weight;
+    private int weight;
 
-    PointAdjacency(double pointStartLat, double pointStartLon, double pointEndLat, double pointEndLon, Double weight) {
+    PointAdjacency(double pointStartLat, double pointStartLon, double pointEndLat, double pointEndLon, Integer weight) {
         this.pointStartLat = pointStartLat;
         this.pointStartLon = pointStartLon;
         this.pointEndLat = pointEndLat;
@@ -59,11 +59,11 @@ public class PointAdjacency extends RealmObject {
         this.pointEndLon = pointEndLon;
     }
 
-    public Double getWeight() {
+    public int getWeight() {
         return weight;
     }
 
-    public void setWeight(Double weight) {
+    public void setWeight(int weight) {
         this.weight = weight;
     }
 }

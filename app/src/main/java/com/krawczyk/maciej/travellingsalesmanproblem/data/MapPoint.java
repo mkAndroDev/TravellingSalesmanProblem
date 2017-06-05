@@ -31,6 +31,6 @@ public class MapPoint {
 
     @Override
     public String toString() {
-        return latLng.toString();
+        return latLng.latitude + "," + latLng.longitude;
     }
 }

@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,9 @@ import com.krawczyk.maciej.travellingsalesmanproblem.R;
 import com.krawczyk.maciej.travellingsalesmanproblem.android.activities.MainActivity;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.Graph;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.MapPoint;
+import com.krawczyk.maciej.travellingsalesmanproblem.domain.ApiConfiguration;
+import com.krawczyk.maciej.travellingsalesmanproblem.domain.Endpoints;
+import com.krawczyk.maciej.travellingsalesmanproblem.domain.models.DistanceMatrix;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +42,9 @@ import java.util.List;
 import java.util.Locale;
 
 import io.realm.Realm;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, MainActivity.MainActivityListener {
@@ -50,6 +57,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private ArrayList<MapPoint> points = new ArrayList<>();
     private LatLng currentPlace;
     Realm realm;
+    Endpoints endpoints = ApiConfiguration.retrofit.create(Endpoints.class);
 
     public MapFragment() {
         // Required empty public constructor
@@ -98,11 +106,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                     .addApi(LocationServices.API)
                     .build();
         }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -226,11 +229,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         Graph graph = realm.createObject(Graph.class);
         for (MapPoint pointStart : points) {
             ArrayList<MapPoint> endPoints = new ArrayList<>();
-            ArrayList<Double> weights = new ArrayList<>();
+            ArrayList<Integer> weights = new ArrayList<>();
             for (MapPoint pointEnd : points) {
                 if (!pointStart.getLatLng().equals(pointEnd.getLatLng())) {
                     endPoints.add(pointEnd);
-                    weights.add(10.34);
+                    Call<DistanceMatrix> distanceMatrix = endpoints.getDistance(pointStart.toString(), pointEnd.toString(), getString(R.string.google_matrix_key));
+                    distanceMatrix.enqueue(new Callback<DistanceMatrix>() {
+                        @Override
+                        public void onResponse(@NonNull Call<DistanceMatrix> call, @NonNull Response<DistanceMatrix> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                weights.add(response.body().getRows().get(0).getElements().get(0).getDistance().getValue());
+                                Log.d("GetDistance", "response == isSuccessful");
+                            } else {
+                                Log.d("GetDistance", "response != isSuccessful");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<DistanceMatrix> call, Throwable t) {
+                            Log.d("GetDistance", "onFailure");
+                        }
+                    });
                 }
             }
             graph.addEdgesForPoint(pointStart, endPoints, weights);
