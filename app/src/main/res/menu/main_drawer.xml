@@ -3,6 +3,10 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_map"
+            android:icon="@android:drawable/ic_dialog_map"
+            android:title="@string/menu_map" />
+        <item
             android:id="@+id/nav_clear_map"
             android:icon="@android:drawable/ic_delete"
             android:title="@string/menu_clear" />
@@ -10,6 +14,10 @@
             android:id="@+id/nav_calculate_route"
             android:icon="@android:drawable/ic_menu_add"
             android:title="@string/menu_calculate" />
+        <item
+            android:id="@+id/nav_historical_routes"
+            android:icon="@android:drawable/ic_menu_add"
+            android:title="@string/menu_historically_routes" />
         <item
             android:id="@+id/nav_about_author"
             android:icon="@android:drawable/ic_menu_info_details"

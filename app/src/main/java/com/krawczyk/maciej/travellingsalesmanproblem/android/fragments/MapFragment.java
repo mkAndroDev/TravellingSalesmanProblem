@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,8 +45,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, MainActivity.MainActivityListener {
+public class MapFragment extends BaseFragment implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private final static LatLng lodz = new LatLng(51.747858, 19.405815);
 
@@ -56,8 +55,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private AlertDialog alertDialog;
     private ArrayList<MapPoint> points = new ArrayList<>();
     private LatLng currentPlace;
-    Realm realm;
-    Endpoints endpoints = ApiConfiguration.retrofit.create(Endpoints.class);
+    private Endpoints endpoints = ApiConfiguration.retrofit.create(Endpoints.class);
 
     public MapFragment() {
         // Required empty public constructor
@@ -81,12 +79,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             view = inflater.inflate(R.layout.fragment_map, container, false);
         }
 
-        ((MainActivity) getActivity()).setupMainActivityListener(this);
+        getMainActivity().setupMainActivityListener(this);
 
         setupViews();
 
         setupGooleApiClient();
-        realm = Realm.getDefaultInstance();
 
         return view;
     }
@@ -225,6 +222,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     }
 
     private Graph getPreparedGraph() {
+        Realm realm = getRealm();
         realm.beginTransaction();
         Graph graph = realm.createObject(Graph.class);
         for (MapPoint pointStart : points) {
@@ -233,7 +231,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             for (MapPoint pointEnd : points) {
                 if (!pointStart.getLatLng().equals(pointEnd.getLatLng())) {
                     endPoints.add(pointEnd);
-                    Call<DistanceMatrix> distanceMatrix = endpoints.getDistance(pointStart.toString(), pointEnd.toString(), getString(R.string.google_matrix_key));
+                    Call<DistanceMatrix> distanceMatrix = endpoints.getDistance(pointStart.toString(), pointEnd.toString());//, getString(R.string.google_matrix_key));
                     distanceMatrix.enqueue(new Callback<DistanceMatrix>() {
                         @Override
                         public void onResponse(@NonNull Call<DistanceMatrix> call, @NonNull Response<DistanceMatrix> response) {
@@ -246,7 +244,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                         }
 
                         @Override
-                        public void onFailure(Call<DistanceMatrix> call, Throwable t) {
+                        public void onFailure(@NonNull Call<DistanceMatrix> call, @NonNull Throwable t) {
                             Log.d("GetDistance", "onFailure");
                         }
                     });

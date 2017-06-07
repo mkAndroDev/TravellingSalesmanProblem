@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.krawczyk.maciej.travellingsalesmanproblem.R;
+import com.krawczyk.maciej.travellingsalesmanproblem.android.fragments.HistoricallyRoutesFragment;
 import com.krawczyk.maciej.travellingsalesmanproblem.android.fragments.MapFragment;
 
 import io.realm.Realm;
@@ -21,6 +22,11 @@ public class MainActivity extends AppCompatActivity
 
     private MainActivityListener mainActivityListener;
     private DrawerLayout drawer;
+    Realm realm;
+
+    public void setupMainActivityListener(MainActivityListener listener) {
+        mainActivityListener = listener;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +36,8 @@ public class MainActivity extends AppCompatActivity
         setupRealm();
 
         setupViews();
+
+        realm = Realm.getDefaultInstance();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -68,10 +76,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void setupMainActivityListener(MainActivityListener listener) {
-        mainActivityListener = listener;
-    }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -79,6 +83,8 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         switch (id) {
+            case R.id.map:
+                loadFragment(MapFragment.newInstance(), false);
             case R.id.nav_clear_map:
                 if (mainActivityListener != null) {
                     mainActivityListener.onMenuItemClicked(R.id.nav_clear_map);
@@ -89,6 +95,8 @@ public class MainActivity extends AppCompatActivity
                     mainActivityListener.onMenuItemClicked(R.id.nav_calculate_route);
                 }
                 break;
+            case R.id.nav_historical_routes:
+                loadFragment(HistoricallyRoutesFragment.newInstance(), true);
             case R.id.nav_about_author:
                 break;
             default:
@@ -96,6 +104,10 @@ public class MainActivity extends AppCompatActivity
         }
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public Realm getRealm() {
+        return realm;
     }
 
     public interface MainActivityListener {

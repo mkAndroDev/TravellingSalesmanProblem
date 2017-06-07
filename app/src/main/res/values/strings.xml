@@ -8,10 +8,13 @@
     <string name="marker_here_you_are_label">Here you are</string>
     <string name="marker_counter_label">marker</string>
 
-    <string name="dialog_ok">ok</string>
-    <string name="dialog_cancel">cancel</string>
+    <string name="dialog_ok">@android:string/ok</string>
+    <string name="dialog_cancel">@android:string/cancel</string>
 
+    <string name="menu_map">Show map</string>
     <string name="menu_clear">Clear map</string>
     <string name="menu_calculate">Calculate route</string>
+    <string name="menu_historically_routes">Historically routes</string>
     <string name="menu_about_author">About author</string>
+
 </resources>
