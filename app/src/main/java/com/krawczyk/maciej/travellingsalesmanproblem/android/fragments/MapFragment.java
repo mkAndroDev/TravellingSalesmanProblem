@@ -83,19 +83,33 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
 
         setupListeners();
 
-        mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(this);
-
-        alertDialog = new AlertDialog.Builder(getContext()).create();
+        setupViews(savedInstanceState);
 
         setupGoogleApiClient();
 
         return view;
     }
 
+    private void setupViews(Bundle savedInstanceState) {
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
+
+        alertDialog = new AlertDialog.Builder(getContext()).create();
+    }
+
     private void setupListeners() {
         getMainActivity().setupMainActivityListener(this);
         mapFragmentPresenter.setMapFragmentView(this);
+    }
+
+    private void setupGoogleApiClient() {
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(getContext())
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
     }
 
     @Override
@@ -122,16 +136,6 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
     public void onLowMemory() {
         super.onLowMemory();
         mapView.onLowMemory();
-    }
-
-    private void setupGoogleApiClient() {
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(getContext())
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
     }
 
     @Override
@@ -252,7 +256,6 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
                 break;
         }
     }
-
 
     @Override
     public void onDistancesTaken(List<PointAdjacency> allWeights) {

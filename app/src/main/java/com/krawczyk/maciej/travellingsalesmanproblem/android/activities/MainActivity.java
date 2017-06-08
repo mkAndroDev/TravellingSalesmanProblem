@@ -88,7 +88,9 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         switch (id) {
             case R.id.nav_show_map:
-                loadFragment(MapFragment.newInstance(), false, MapFragment.class.getSimpleName());
+                if (getSupportFragmentManager().findFragmentByTag(MapFragment.class.getSimpleName()) != null && !getSupportFragmentManager().findFragmentByTag(MapFragment.class.getSimpleName()).isVisible()) {
+                    loadFragment(MapFragment.newInstance(), false, MapFragment.class.getSimpleName());
+                }
             case R.id.nav_clear_map:
                 if (mainActivityListener != null) {
                     mainActivityListener.onMenuItemClicked(R.id.nav_clear_map);
