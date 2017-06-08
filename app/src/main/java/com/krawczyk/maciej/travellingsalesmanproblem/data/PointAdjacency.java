@@ -1,5 +1,7 @@
 package com.krawczyk.maciej.travellingsalesmanproblem.data;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import io.realm.RealmObject;
 import io.realm.annotations.RealmClass;
 
@@ -25,6 +27,14 @@ public class PointAdjacency extends RealmObject {
 
     public PointAdjacency() {
         // Required empty public constructor
+    }
+
+    public PointAdjacency(LatLng pointStart, LatLng pointEnd, int weight) {
+        this.pointStartLat = pointStart.latitude;
+        this.pointStartLon = pointStart.longitude;
+        this.pointEndLat = pointEnd.latitude;
+        this.pointEndLon = pointEnd.longitude;
+        this.weight = weight;
     }
 
     public double getPointStartLat() {
@@ -65,5 +75,10 @@ public class PointAdjacency extends RealmObject {
 
     public void setWeight(int weight) {
         this.weight = weight;
+    }
+
+    @Override
+    public String toString() {
+        return pointStartLat + ", " + pointStartLon + " : " + pointEndLat + ", " + pointEndLon + " -> " + weight;
     }
 }

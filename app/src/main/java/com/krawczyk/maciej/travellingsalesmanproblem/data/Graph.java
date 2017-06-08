@@ -22,14 +22,10 @@ public class Graph extends RealmObject {
         return points;
     }
 
-    public void addEdgesForPoint(MapPoint mapPointStart, ArrayList<MapPoint> endMapPoints, ArrayList<Integer> weights) {
+    public void addEdgesForPoint(MapPoint mapPointStart, ArrayList<PointAdjacency> adjacencies) {
         RealmList<PointAdjacency> adjacencyPoints = new RealmList<>();
 
-        for (int i = 0; i < endMapPoints.size(); i++) {
-            PointAdjacency pointAdjacency = new PointAdjacency(mapPointStart.getLatLng().latitude, mapPointStart.getLatLng().longitude,
-                    endMapPoints.get(i).getLatLng().latitude, endMapPoints.get(i).getLatLng().longitude, weights.get(i));
-            adjacencyPoints.add(pointAdjacency);
-        }
+        adjacencyPoints.addAll(adjacencies);
 
         points.add(new GraphPoint(mapPointStart.getLatLng().latitude, mapPointStart.getLatLng().longitude, adjacencyPoints));
     }

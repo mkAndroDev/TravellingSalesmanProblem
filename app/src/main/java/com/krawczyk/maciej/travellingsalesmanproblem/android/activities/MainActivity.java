@@ -37,11 +37,9 @@ public class MainActivity extends AppCompatActivity
 
         setupViews();
 
-        realm = Realm.getDefaultInstance();
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        loadFragment(MapFragment.newInstance(), false);
+        loadFragment(MapFragment.newInstance(), false, MapFragment.class.getSimpleName());
     }
 
     private void setupViews() {
@@ -55,16 +53,23 @@ public class MainActivity extends AppCompatActivity
                 .schemaVersion(1)
                 .build();
         Realm.setDefaultConfiguration(config);
+        realm = Realm.getDefaultInstance();
     }
 
-    private void loadFragment(Fragment fragment, boolean addToBacktack) {
+    private void loadFragment(Fragment fragment, boolean addToBackStack, String tag) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        transaction.replace(R.id.fl_fragment_content, fragment);
-        if (addToBacktack) {
+        transaction.replace(R.id.fl_fragment_content, fragment, tag);
+        if (addToBackStack) {
             transaction.addToBackStack(fragment.getClass().getName());
         }
         transaction.commitAllowingStateLoss();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
     }
 
     @Override
@@ -81,13 +86,17 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
         switch (id) {
-            case R.id.map:
-                loadFragment(MapFragment.newInstance(), false);
+            case R.id.nav_show_map:
+                loadFragment(MapFragment.newInstance(), false, MapFragment.class.getSimpleName());
             case R.id.nav_clear_map:
                 if (mainActivityListener != null) {
                     mainActivityListener.onMenuItemClicked(R.id.nav_clear_map);
+                }
+                break;
+            case R.id.nav_get_distances:
+                if (mainActivityListener != null) {
+                    mainActivityListener.onMenuItemClicked(R.id.nav_get_distances);
                 }
                 break;
             case R.id.nav_calculate_route:
@@ -96,14 +105,14 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
             case R.id.nav_historical_routes:
-                loadFragment(HistoricallyRoutesFragment.newInstance(), true);
+                loadFragment(HistoricallyRoutesFragment.newInstance(), true, HistoricallyRoutesFragment.class.getSimpleName());
             case R.id.nav_about_author:
                 break;
             default:
                 break;
         }
         drawer.closeDrawer(GravityCompat.START);
-        return true;
+        return false;
     }
 
     public Realm getRealm() {

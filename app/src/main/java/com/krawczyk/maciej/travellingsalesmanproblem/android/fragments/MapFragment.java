@@ -12,7 +12,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,39 +22,40 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.krawczyk.maciej.travellingsalesmanproblem.R;
-import com.krawczyk.maciej.travellingsalesmanproblem.android.activities.MainActivity;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.Graph;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.MapPoint;
-import com.krawczyk.maciej.travellingsalesmanproblem.domain.ApiConfiguration;
-import com.krawczyk.maciej.travellingsalesmanproblem.domain.Endpoints;
-import com.krawczyk.maciej.travellingsalesmanproblem.domain.models.DistanceMatrix;
+import com.krawczyk.maciej.travellingsalesmanproblem.data.PointAdjacency;
+import com.krawczyk.maciej.travellingsalesmanproblem.domain.MapFragmentView;
+import com.krawczyk.maciej.travellingsalesmanproblem.domain.presenters.MapFragmentPresenter;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import io.realm.Realm;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MapFragment extends BaseFragment implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, MapFragmentView {
 
     private final static LatLng lodz = new LatLng(51.747858, 19.405815);
+
+    private MapFragmentPresenter mapFragmentPresenter = new MapFragmentPresenter();
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private AlertDialog alertDialog;
     private ArrayList<MapPoint> points = new ArrayList<>();
     private LatLng currentPlace;
-    private Endpoints endpoints = ApiConfiguration.retrofit.create(Endpoints.class);
+
+    @BindView(R.id.map_view)
+    MapView mapView;
 
     public MapFragment() {
         // Required empty public constructor
@@ -79,23 +79,52 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
             view = inflater.inflate(R.layout.fragment_map, container, false);
         }
 
-        getMainActivity().setupMainActivityListener(this);
+        ButterKnife.bind(this, view);
 
-        setupViews();
+        setupListeners();
 
-        setupGooleApiClient();
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
+
+        alertDialog = new AlertDialog.Builder(getContext()).create();
+
+        setupGoogleApiClient();
 
         return view;
     }
 
-    private void setupViews() {
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        alertDialog = new AlertDialog.Builder(getContext()).create();
+    private void setupListeners() {
+        getMainActivity().setupMainActivityListener(this);
+        mapFragmentPresenter.setMapFragmentView(this);
     }
 
-    private void setupGooleApiClient() {
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+
+
+    }
+
+    @Override
+    public void onPause() {
+        mapView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        mapView.onDestroy();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    private void setupGoogleApiClient() {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(getContext())
                     .addConnectionCallbacks(this)
@@ -116,14 +145,14 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
         mMap = googleMap;
 
         mMap.setOnMapLongClickListener(latLng -> {
-            int id = points.size();
             String name = getAddress(latLng);
-            points.add(new MapPoint(id, name, latLng));
+            points.add(new MapPoint(name, latLng));
             mMap.addMarker(new MarkerOptions().position(latLng).title(name));
         });
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(lodz));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lodz, 12.0f));
     }
+
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
@@ -212,47 +241,41 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
                 mMap.addMarker(new MarkerOptions().title(getString(R.string.marker_here_you_are_label)).position(currentPlace));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPlace, 12.0f));
                 break;
-            case R.id.nav_calculate_route:
-                Graph graph = getPreparedGraph();
-                Toast.makeText(getContext(), "Graph edges: " + graph.getEdgesCount() + ", vertices: " + graph.getVerticesCount(), Toast.LENGTH_LONG).show();
+            case R.id.nav_get_distances:
+                if (points.size() >= 2) {
+                    mapFragmentPresenter.getPreparedDistances(points, getString(R.string.google_matrix_key));
+                } else {
+                    Toast.makeText(getContext(), getText(R.string.add_more_points), Toast.LENGTH_LONG).show();
+                }
                 break;
             default:
                 break;
         }
     }
 
-    private Graph getPreparedGraph() {
-        Realm realm = getRealm();
-        realm.beginTransaction();
-        Graph graph = realm.createObject(Graph.class);
-        for (MapPoint pointStart : points) {
-            ArrayList<MapPoint> endPoints = new ArrayList<>();
-            ArrayList<Integer> weights = new ArrayList<>();
-            for (MapPoint pointEnd : points) {
-                if (!pointStart.getLatLng().equals(pointEnd.getLatLng())) {
-                    endPoints.add(pointEnd);
-                    Call<DistanceMatrix> distanceMatrix = endpoints.getDistance(pointStart.toString(), pointEnd.toString());//, getString(R.string.google_matrix_key));
-                    distanceMatrix.enqueue(new Callback<DistanceMatrix>() {
-                        @Override
-                        public void onResponse(@NonNull Call<DistanceMatrix> call, @NonNull Response<DistanceMatrix> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                weights.add(response.body().getRows().get(0).getElements().get(0).getDistance().getValue());
-                                Log.d("GetDistance", "response == isSuccessful");
-                            } else {
-                                Log.d("GetDistance", "response != isSuccessful");
-                            }
-                        }
 
-                        @Override
-                        public void onFailure(@NonNull Call<DistanceMatrix> call, @NonNull Throwable t) {
-                            Log.d("GetDistance", "onFailure");
-                        }
-                    });
+    @Override
+    public void onDistancesTaken(List<PointAdjacency> allWeights) {
+        getRealm().beginTransaction();
+        Graph graph = getRealm().createObject(Graph.class);
+        ArrayList<PointAdjacency> pointAdjacencies = new ArrayList<>();
+        for (MapPoint point : points) {
+            pointAdjacencies.clear();
+            for (PointAdjacency pointAdjacency : allWeights) {
+                if (pointAdjacency.getPointStartLat() == point.getLatLng().latitude && pointAdjacency.getPointStartLon() == point.getLatLng().longitude) {
+                    pointAdjacencies.add(pointAdjacency);
                 }
             }
-            graph.addEdgesForPoint(pointStart, endPoints, weights);
+            graph.addEdgesForPoint(point, pointAdjacencies);
         }
-        realm.commitTransaction();
-        return graph;
+
+        getRealm().commitTransaction();
+
+        Toast.makeText(getContext(), getText(R.string.distances_success), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onError(String message) {
+        Toast.makeText(getContext(), getText(R.string.distances_error) + " " + message, Toast.LENGTH_LONG).show();
     }
 }

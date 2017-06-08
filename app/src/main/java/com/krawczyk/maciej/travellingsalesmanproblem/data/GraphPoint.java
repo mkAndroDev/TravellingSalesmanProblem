@@ -48,4 +48,9 @@ public class GraphPoint extends RealmObject {
     public void setAdjacencyPoints(RealmList<PointAdjacency> adjacencyPoints) {
         this.adjacencyPoints = adjacencyPoints;
     }
+
+    @Override
+    public String toString() {
+        return lat + ", " + lng;
+    }
 }

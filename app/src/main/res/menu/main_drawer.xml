@@ -3,17 +3,25 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_map"
-            android:icon="@android:drawable/ic_dialog_map"
-            android:title="@string/menu_map" />
-        <item
             android:id="@+id/nav_clear_map"
             android:icon="@android:drawable/ic_delete"
             android:title="@string/menu_clear" />
         <item
+            android:id="@+id/nav_get_distances"
+            android:icon="@android:drawable/ic_menu_add"
+            android:title="@string/menu_distances" />
+        <item
             android:id="@+id/nav_calculate_route"
             android:icon="@android:drawable/ic_menu_add"
             android:title="@string/menu_calculate" />
+
+    </group>
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_show_map"
+            android:icon="@android:drawable/ic_dialog_map"
+            android:title="@string/menu_map" />
         <item
             android:id="@+id/nav_historical_routes"
             android:icon="@android:drawable/ic_menu_add"

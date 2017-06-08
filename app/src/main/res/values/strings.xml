@@ -13,8 +13,13 @@
 
     <string name="menu_map">Show map</string>
     <string name="menu_clear">Clear map</string>
+    <string name="menu_distances">Get distances</string>
     <string name="menu_calculate">Calculate route</string>
     <string name="menu_historically_routes">Historically routes</string>
     <string name="menu_about_author">About author</string>
+
+    <string name="add_more_points">Add more points, at least 2!</string>
+    <string name="distances_success">Success, distances taken</string>
+    <string name="distances_error">Error:</string>
 
 </resources>
