@@ -24,10 +24,12 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.krawczyk.maciej.travellingsalesmanproblem.R;
 import com.krawczyk.maciej.travellingsalesmanproblem.android.Utils.Utils;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.AdjacencyPoint;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.Graph;
+import com.krawczyk.maciej.travellingsalesmanproblem.data.GraphPoint;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.MapPoint;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.Route;
 import com.krawczyk.maciej.travellingsalesmanproblem.domain.MapFragmentView;
@@ -40,7 +42,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MapFragment extends BaseFragment implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, MapFragmentView {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, MapFragmentView, CalculatedRouteFragment.OnCalculatedRouteFragmentListener {
 
     private final static LatLng lodz = new LatLng(51.747858, 19.405815);
 
@@ -51,6 +53,7 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
     private AlertDialog alertDialog;
     private ArrayList<MapPoint> points = new ArrayList<>();
     private LatLng currentPlace;
+    private Route route;
 
     @BindView(R.id.map_view)
     MapView mapView;
@@ -152,13 +155,20 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
             mMap.addMarker(new MarkerOptions().position(latLng).title(name));
         });
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lodz, 12.0f));
+        if (route != null) {
+            showRoute(route);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(route.getPoints().get(0).getLatLng(), 12.0f));
+        } else {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lodz, 12.0f));
+        }
     }
 
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        setCurrentLocation();
+        if (route == null) {
+            setCurrentLocation();
+        }
     }
 
     @Override
@@ -228,10 +238,12 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
             case R.id.nav_clear_map:
                 mMap.clear();
                 points.clear();
+                route = null;
                 mMap.addMarker(new MarkerOptions().title(getString(R.string.marker_here_you_are_label)).position(currentPlace));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPlace, 12.0f));
                 break;
             case R.id.nav_calculate_route:
+                route = null;
                 if (points.size() >= 2) {
                     mapFragmentPresenter.getPreparedDistances(points, getString(R.string.google_matrix_key));
                 } else {
@@ -268,11 +280,45 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
 
     @Override
     public void onRouteCalculated(Route route) {
-        loadFragment(CalculatedRouteFragment.newInstance(route));
+        showRoute(route);
     }
 
     @Override
     public void onError(String message) {
         Toast.makeText(getContext(), getText(R.string.distances_error) + " " + message, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void showRouteOnMap(Route route) {
+        this.route = route;
+    }
+
+    @Override
+    public void onShowOnMapClicked(Route route) {
+        Toast.makeText(getContext(), " OKOŃ ", Toast.LENGTH_LONG).show();
+    }
+
+    private void showRoute(Route route) {
+        mMap.clear();
+        for (GraphPoint graphPoint : route.getPoints()) {
+            LatLng latLng = new LatLng(graphPoint.getLat(), graphPoint.getLon());
+            mMap.addMarker(new MarkerOptions().title(graphPoint.getName()).position(latLng).title(route.getPoints().indexOf(graphPoint) + " localization"));
+
+            if (route.getPoints().indexOf(graphPoint) < route.getPoints().size() - 1) {
+                GraphPoint nextGraphPoint = route.getPoints().get(route.getPoints().indexOf(graphPoint) + 1);
+                LatLng latLngOfNext = new LatLng(nextGraphPoint.getLat(), nextGraphPoint.getLon());
+
+                mMap.addPolyline(new PolylineOptions()
+                        .add(latLng, latLngOfNext)
+                        .geodesic(true));
+            } else {
+                GraphPoint firstGraphPoint = route.getPoints().get(0);
+                LatLng latLngOfNext = new LatLng(firstGraphPoint.getLat(), firstGraphPoint.getLon());
+
+                mMap.addPolyline(new PolylineOptions()
+                        .add(latLng, latLngOfNext)
+                        .geodesic(true));
+            }
+        }
     }
 }

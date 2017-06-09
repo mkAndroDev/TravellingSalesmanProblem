@@ -1,5 +1,7 @@
 package com.krawczyk.maciej.travellingsalesmanproblem.data;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.RealmClass;
@@ -12,13 +14,13 @@ public class GraphPoint extends RealmObject {
 
     private String name;
     private double lat;
-    private double lng;
+    private double lon;
     private RealmList<AdjacencyPoint> adjacencyPoints;
 
     GraphPoint(String name, double lat, double lng, RealmList<AdjacencyPoint> adjacencyPoints) {
         this.name = name;
         this.lat = lat;
-        this.lng = lng;
+        this.lon = lng;
         this.adjacencyPoints = adjacencyPoints;
     }
 
@@ -34,6 +36,10 @@ public class GraphPoint extends RealmObject {
         this.name = name;
     }
 
+    public LatLng getLatLng() {
+        return new LatLng(lat, lon);
+    }
+
     public double getLat() {
 
         return lat;
@@ -44,11 +50,11 @@ public class GraphPoint extends RealmObject {
     }
 
     public double getLon() {
-        return lng;
+        return lon;
     }
 
-    public void setLng(double lng) {
-        this.lng = lng;
+    public void setLon(double lon) {
+        this.lon = lon;
     }
 
     public RealmList<AdjacencyPoint> getAdjacencyPoints() {
@@ -61,6 +67,6 @@ public class GraphPoint extends RealmObject {
 
     @Override
     public String toString() {
-        return lat + ", " + lng;
+        return lat + ", " + lon;
     }
 }

@@ -12,14 +12,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.krawczyk.maciej.travellingsalesmanproblem.R;
-import com.krawczyk.maciej.travellingsalesmanproblem.data.GraphPoint;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.AdjacencyPoint;
+import com.krawczyk.maciej.travellingsalesmanproblem.data.GraphPoint;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.Route;
 
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by maciek on 09.06.17.
@@ -34,10 +35,12 @@ public class CalculatedRouteFragment extends BaseFragment {
     @BindView(R.id.tv_distance)
     TextView distanceTV;
 
+    private OnCalculatedRouteFragmentListener listener;
     private Route route;
 
-    public static CalculatedRouteFragment newInstance(Route route) {
+    public static CalculatedRouteFragment newInstance(Route route, OnCalculatedRouteFragmentListener listener) {
         CalculatedRouteFragment calculatedRouteFragment = new CalculatedRouteFragment();
+        calculatedRouteFragment.listener = listener;
         calculatedRouteFragment.route = route;
         return calculatedRouteFragment;
     }
@@ -86,6 +89,18 @@ public class CalculatedRouteFragment extends BaseFragment {
                 Log.d(CalculatedRouteFragment.class.getSimpleName(), adjacencyPoint.toString());
             }
         });
+    }
+
+    @OnClick(R.id.btn_show_on_map)
+    void onShowOnMapClicked() {
+        if (listener != null) {
+            getMainActivity().onBackPressed();
+            listener.onShowOnMapClicked(route);
+        }
+    }
+
+    public interface OnCalculatedRouteFragmentListener {
+        void onShowOnMapClicked(Route route);
     }
 
 }

@@ -20,14 +20,19 @@ import butterknife.ButterKnife;
 /**
  * Created by maciejkrawczyk on 07.06.2017.
  */
-public class HistoricallyRoutesFragment extends BaseFragment {
+public class HistoricallyRoutesFragment extends BaseFragment
+        implements CalculatedRouteFragment.OnCalculatedRouteFragmentListener {
 
     @BindView(R.id.lv_historically_routes)
     ListView historicallyRoutes;
-    ArrayList<String> strings = new ArrayList<>();
 
-    public static HistoricallyRoutesFragment newInstance() {
-        return new HistoricallyRoutesFragment();
+    private OnHistoricallyRoutesFragmentListener listener;
+    private ArrayList<String> strings = new ArrayList<>();
+
+    public static HistoricallyRoutesFragment newInstance(OnHistoricallyRoutesFragmentListener listener) {
+        HistoricallyRoutesFragment historicallyRoutesFragment = new HistoricallyRoutesFragment();
+        historicallyRoutesFragment.listener = listener;
+        return historicallyRoutesFragment;
     }
 
     @Override
@@ -64,8 +69,19 @@ public class HistoricallyRoutesFragment extends BaseFragment {
 
             Route route = Utils.getBestRoute(graph);
 
-            loadFragment(CalculatedRouteFragment.newInstance(route));
+            loadFragment(CalculatedRouteFragment.newInstance(route, this));
         });
     }
 
+    @Override
+    public void onShowOnMapClicked(Route route) {
+        if (listener != null) {
+            listener.onShowRoadOnMapClicked(route);
+            getMainActivity().onBackPressed();
+        }
+    }
+
+    public interface OnHistoricallyRoutesFragmentListener {
+        void onShowRoadOnMapClicked(Route route);
+    }
 }

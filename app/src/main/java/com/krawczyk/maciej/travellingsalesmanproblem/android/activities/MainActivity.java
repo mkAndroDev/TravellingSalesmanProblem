@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import com.krawczyk.maciej.travellingsalesmanproblem.R;
 import com.krawczyk.maciej.travellingsalesmanproblem.android.fragments.HistoricallyRoutesFragment;
 import com.krawczyk.maciej.travellingsalesmanproblem.android.fragments.MapFragment;
+import com.krawczyk.maciej.travellingsalesmanproblem.data.Route;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -74,30 +75,31 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
         switch (id) {
             case R.id.nav_show_map:
-                if (getSupportFragmentManager().findFragmentByTag(MapFragment.class.getSimpleName()) != null && !getSupportFragmentManager().findFragmentByTag(MapFragment.class.getSimpleName()).isVisible()) {
+                if (getSupportFragmentManager().findFragmentByTag(MapFragment.class.getSimpleName()) != null
+                        && !getSupportFragmentManager().findFragmentByTag(MapFragment.class.getSimpleName()).isVisible()) {
                     loadFragment(MapFragment.newInstance(), false, MapFragment.class.getSimpleName());
                 }
             case R.id.nav_clear_map:
                 if (mainActivityListener != null) {
                     mainActivityListener.onMenuItemClicked(R.id.nav_clear_map);
                 }
-                break;
-            case R.id.nav_get_distances:
-                if (mainActivityListener != null) {
-                    mainActivityListener.onMenuItemClicked(R.id.nav_get_distances);
-                }
-                break;
             case R.id.nav_calculate_route:
                 if (mainActivityListener != null) {
-                    mainActivityListener.onMenuItemClicked(R.id.nav_calculate_route);
+git                     mainActivityListener.onMenuItemClicked(R.id.nav_calculate_route);
                 }
                 break;
             case R.id.nav_historical_routes:
-                loadFragment(HistoricallyRoutesFragment.newInstance(), true, HistoricallyRoutesFragment.class.getSimpleName());
+
+                HistoricallyRoutesFragment.OnHistoricallyRoutesFragmentListener onHistoricallyRoutesFragmentListener = route -> {
+                    if (mainActivityListener != null) {
+                        mainActivityListener.showRouteOnMap(route);
+                    }
+                };
+
+                loadFragment(HistoricallyRoutesFragment.newInstance(onHistoricallyRoutesFragmentListener), true, HistoricallyRoutesFragment.class.getSimpleName());
             case R.id.nav_about_author:
                 break;
             default:
@@ -123,5 +125,7 @@ public class MainActivity extends AppCompatActivity
 
     public interface MainActivityListener {
         void onMenuItemClicked(int menuItemId);
+
+        void showRouteOnMap(Route route);
     }
 }

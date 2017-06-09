@@ -19,10 +19,10 @@
             android:id="@+id/tv_distance_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.5"
+            android:layout_weight="0.33"
             android:gravity="center"
             android:padding="16dp"
-            android:text="@string/distance_for_route"
+            android:text="@string/distance_for_route_label"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -31,12 +31,20 @@
             android:id="@+id/tv_distance"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.5"
+            android:layout_weight="0.33"
             android:gravity="center"
             android:padding="16dp"
             android:text="12568km"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btn_show_on_map"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.33"
+            android:gravity="center"
+            android:text="@string/show_on_map_label" />
     </LinearLayout>
 </RelativeLayout>

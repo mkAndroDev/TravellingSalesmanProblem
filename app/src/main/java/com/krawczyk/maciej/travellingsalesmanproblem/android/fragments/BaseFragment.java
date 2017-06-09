@@ -3,6 +3,7 @@ package com.krawczyk.maciej.travellingsalesmanproblem.android.fragments;
 import android.support.v4.app.Fragment;
 
 import com.krawczyk.maciej.travellingsalesmanproblem.android.activities.MainActivity;
+import com.krawczyk.maciej.travellingsalesmanproblem.data.Route;
 
 import io.realm.Realm;
 
@@ -26,6 +27,11 @@ public class BaseFragment extends Fragment implements MainActivity.MainActivityL
 
     @Override
     public void onMenuItemClicked(int menuItemId) {
+
+    }
+
+    @Override
+    public void showRouteOnMap(Route route) {
 
     }
 }

@@ -21,6 +21,7 @@
     <string name="add_more_points">Add more points, at least 2!</string>
     <string name="distances_success">Success, distances taken</string>
     <string name="distances_error">Error:</string>
-    <string name="distance_for_route">Distance:</string>
+    <string name="distance_for_route_label">Distance:</string>
+    <string name="show_on_map_label">Show on map</string>
 
 </resources>
