@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity
                 }
             case R.id.nav_calculate_route:
                 if (mainActivityListener != null) {
-git                     mainActivityListener.onMenuItemClicked(R.id.nav_calculate_route);
+                    mainActivityListener.onMenuItemClicked(R.id.nav_calculate_route);
                 }
                 break;
             case R.id.nav_historical_routes:
