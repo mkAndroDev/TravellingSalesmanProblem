@@ -1,6 +1,7 @@
 package com.krawczyk.maciej.travellingsalesmanproblem.domain;
 
-import com.krawczyk.maciej.travellingsalesmanproblem.data.PointAdjacency;
+import com.krawczyk.maciej.travellingsalesmanproblem.data.AdjacencyPoint;
+import com.krawczyk.maciej.travellingsalesmanproblem.data.Route;
 
 import java.util.List;
 
@@ -9,7 +10,9 @@ import java.util.List;
  */
 public interface MapFragmentView {
 
-    void onDistancesTaken(List<PointAdjacency> allWeights);
+    void onDistancesTaken(List<AdjacencyPoint> allWeights);
+
+    void onRouteCalculated(Route route);
 
     void onError(String message);
 

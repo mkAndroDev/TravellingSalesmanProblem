@@ -1,7 +1,6 @@
 package com.krawczyk.maciej.travellingsalesmanproblem.android.fragments;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,9 +8,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.krawczyk.maciej.travellingsalesmanproblem.R;
+import com.krawczyk.maciej.travellingsalesmanproblem.android.Utils.Utils;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.Graph;
-import com.krawczyk.maciej.travellingsalesmanproblem.data.GraphPoint;
-import com.krawczyk.maciej.travellingsalesmanproblem.data.PointAdjacency;
+import com.krawczyk.maciej.travellingsalesmanproblem.data.Route;
 
 import java.util.ArrayList;
 
@@ -41,6 +40,12 @@ public class HistoricallyRoutesFragment extends BaseFragment {
 
         ButterKnife.bind(this, view);
 
+        setupViews();
+
+        return view;
+    }
+
+    private void setupViews() {
         strings.clear();
         if (getRealm().allObjects(Graph.class) != null) {
             for (int i = 0; i < getRealm().allObjects(Graph.class).size(); i++) {
@@ -56,16 +61,11 @@ public class HistoricallyRoutesFragment extends BaseFragment {
 
         historicallyRoutes.setOnItemClickListener((adapterView, view1, i, l) -> {
             Graph graph = getRealm().allObjects(Graph.class).get(i);
-            for (GraphPoint point : graph.getPoints()) {
-                for (PointAdjacency adjacencyPoint : point.getAdjacencyPoints()) {
-                    Log.d(this.getClass().getSimpleName(), "Point: " + point.toString() + ", adjacency: " + adjacencyPoint.toString());
-                }
-            }
+
+            Route route = Utils.getBestRoute(graph);
+
+            loadFragment(CalculatedRouteFragment.newInstance(route));
         });
-
-        getMainActivity().setupMainActivityListener(this);
-
-        return view;
     }
 
 }

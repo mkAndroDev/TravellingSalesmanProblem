@@ -3,8 +3,6 @@ package com.krawczyk.maciej.travellingsalesmanproblem.android.fragments;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,16 +25,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.krawczyk.maciej.travellingsalesmanproblem.R;
+import com.krawczyk.maciej.travellingsalesmanproblem.android.Utils.Utils;
+import com.krawczyk.maciej.travellingsalesmanproblem.data.AdjacencyPoint;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.Graph;
 import com.krawczyk.maciej.travellingsalesmanproblem.data.MapPoint;
-import com.krawczyk.maciej.travellingsalesmanproblem.data.PointAdjacency;
+import com.krawczyk.maciej.travellingsalesmanproblem.data.Route;
 import com.krawczyk.maciej.travellingsalesmanproblem.domain.MapFragmentView;
 import com.krawczyk.maciej.travellingsalesmanproblem.domain.presenters.MapFragmentPresenter;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -149,7 +147,7 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
         mMap = googleMap;
 
         mMap.setOnMapLongClickListener(latLng -> {
-            String name = getAddress(latLng);
+            String name = Utils.getAddress(getContext(), latLng);
             points.add(new MapPoint(name, latLng));
             mMap.addMarker(new MarkerOptions().position(latLng).title(name));
         });
@@ -224,18 +222,6 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
         }
     }
 
-    private String getAddress(LatLng latLng) {
-        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-            Address address = addresses.get(0);
-            return address.getAddressLine(0) + ", " + address.getLocality();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     @Override
     public void onMenuItemClicked(int menuItemId) {
         switch (menuItemId) {
@@ -245,7 +231,7 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
                 mMap.addMarker(new MarkerOptions().title(getString(R.string.marker_here_you_are_label)).position(currentPlace));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPlace, 12.0f));
                 break;
-            case R.id.nav_get_distances:
+            case R.id.nav_calculate_route:
                 if (points.size() >= 2) {
                     mapFragmentPresenter.getPreparedDistances(points, getString(R.string.google_matrix_key));
                 } else {
@@ -258,15 +244,15 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
     }
 
     @Override
-    public void onDistancesTaken(List<PointAdjacency> allWeights) {
+    public void onDistancesTaken(List<AdjacencyPoint> allWeights) {
         getRealm().beginTransaction();
         Graph graph = getRealm().createObject(Graph.class);
-        ArrayList<PointAdjacency> pointAdjacencies = new ArrayList<>();
+        ArrayList<AdjacencyPoint> pointAdjacencies = new ArrayList<>();
         for (MapPoint point : points) {
             pointAdjacencies.clear();
-            for (PointAdjacency pointAdjacency : allWeights) {
-                if (pointAdjacency.getPointStartLat() == point.getLatLng().latitude && pointAdjacency.getPointStartLon() == point.getLatLng().longitude) {
-                    pointAdjacencies.add(pointAdjacency);
+            for (AdjacencyPoint adjacencyPoint : allWeights) {
+                if (adjacencyPoint.getPointStartLat() == point.getLatLng().latitude && adjacencyPoint.getPointStartLon() == point.getLatLng().longitude) {
+                    pointAdjacencies.add(adjacencyPoint);
                 }
             }
             graph.addEdgesForPoint(point, pointAdjacencies);
@@ -274,7 +260,15 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
 
         getRealm().commitTransaction();
 
+        mapFragmentPresenter.calculateRoute(graph);
+
+
         Toast.makeText(getContext(), getText(R.string.distances_success), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onRouteCalculated(Route route) {
+        loadFragment(CalculatedRouteFragment.newInstance(route));
     }
 
     @Override

@@ -56,16 +56,6 @@ public class MainActivity extends AppCompatActivity
         realm = Realm.getDefaultInstance();
     }
 
-    private void loadFragment(Fragment fragment, boolean addToBackStack, String tag) {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
-        transaction.replace(R.id.fl_fragment_content, fragment, tag);
-        if (addToBackStack) {
-            transaction.addToBackStack(fragment.getClass().getName());
-        }
-        transaction.commitAllowingStateLoss();
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -119,6 +109,16 @@ public class MainActivity extends AppCompatActivity
 
     public Realm getRealm() {
         return realm;
+    }
+
+    public void loadFragment(Fragment fragment, boolean addToBackStack, String tag) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+        transaction.replace(R.id.fl_fragment_content, fragment, tag);
+        if (addToBackStack) {
+            transaction.addToBackStack(fragment.getClass().getName());
+        }
+        transaction.commitAllowingStateLoss();
     }
 
     public interface MainActivityListener {

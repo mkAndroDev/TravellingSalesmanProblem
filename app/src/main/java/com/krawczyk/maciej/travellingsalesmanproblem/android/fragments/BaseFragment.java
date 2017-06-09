@@ -16,6 +16,10 @@ public class BaseFragment extends Fragment implements MainActivity.MainActivityL
         return (MainActivity) getActivity();
     }
 
+    public void loadFragment(BaseFragment fragment) {
+        getMainActivity().loadFragment(fragment, true, fragment.getClass().getSimpleName());
+    }
+
     public Realm getRealm() {
         return getMainActivity().getRealm();
     }

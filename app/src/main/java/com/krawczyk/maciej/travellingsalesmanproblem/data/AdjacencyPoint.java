@@ -9,7 +9,7 @@ import io.realm.annotations.RealmClass;
  * Created by maciek on 02.06.17.
  */
 @RealmClass
-public class PointAdjacency extends RealmObject {
+public class AdjacencyPoint extends RealmObject {
 
     private double pointStartLat;
     private double pointStartLon;
@@ -17,7 +17,7 @@ public class PointAdjacency extends RealmObject {
     private double pointEndLon;
     private int weight;
 
-    PointAdjacency(double pointStartLat, double pointStartLon, double pointEndLat, double pointEndLon, Integer weight) {
+    AdjacencyPoint(double pointStartLat, double pointStartLon, double pointEndLat, double pointEndLon, Integer weight) {
         this.pointStartLat = pointStartLat;
         this.pointStartLon = pointStartLon;
         this.pointEndLat = pointEndLat;
@@ -25,11 +25,11 @@ public class PointAdjacency extends RealmObject {
         this.weight = weight;
     }
 
-    public PointAdjacency() {
+    public AdjacencyPoint() {
         // Required empty public constructor
     }
 
-    public PointAdjacency(LatLng pointStart, LatLng pointEnd, int weight) {
+    public AdjacencyPoint(LatLng pointStart, LatLng pointEnd, int weight) {
         this.pointStartLat = pointStart.latitude;
         this.pointStartLon = pointStart.longitude;
         this.pointEndLat = pointEnd.latitude;

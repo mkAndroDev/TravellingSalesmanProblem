@@ -10,11 +10,13 @@ import io.realm.annotations.RealmClass;
 @RealmClass
 public class GraphPoint extends RealmObject {
 
+    private String name;
     private double lat;
     private double lng;
-    private RealmList<PointAdjacency> adjacencyPoints;
+    private RealmList<AdjacencyPoint> adjacencyPoints;
 
-    GraphPoint(double lat, double lng, RealmList<PointAdjacency> adjacencyPoints) {
+    GraphPoint(String name, double lat, double lng, RealmList<AdjacencyPoint> adjacencyPoints) {
+        this.name = name;
         this.lat = lat;
         this.lng = lng;
         this.adjacencyPoints = adjacencyPoints;
@@ -22,6 +24,14 @@ public class GraphPoint extends RealmObject {
 
     public GraphPoint() {
         // Required empty public constructor
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public double getLat() {
@@ -33,7 +43,7 @@ public class GraphPoint extends RealmObject {
         this.lat = lat;
     }
 
-    public double getLng() {
+    public double getLon() {
         return lng;
     }
 
@@ -41,11 +51,11 @@ public class GraphPoint extends RealmObject {
         this.lng = lng;
     }
 
-    public RealmList<PointAdjacency> getAdjacencyPoints() {
+    public RealmList<AdjacencyPoint> getAdjacencyPoints() {
         return adjacencyPoints;
     }
 
-    public void setAdjacencyPoints(RealmList<PointAdjacency> adjacencyPoints) {
+    public void setAdjacencyPoints(RealmList<AdjacencyPoint> adjacencyPoints) {
         this.adjacencyPoints = adjacencyPoints;
     }
 
