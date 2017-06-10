@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'realm-android'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 25
@@ -23,6 +24,18 @@ android {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
+    sourceSets {
+        test.java.srcDirs += 'src/test/kotlin'
+        androidTest.java.srcDirs += 'src/androidTest/kotlin'
+    }
+}
+
+afterEvaluate {
+    android.sourceSets.all { sourceSet ->
+        if (!sourceSet.name.startsWith('test') || !sourceSet.name.startsWith('androidTest')) {
+            sourceSet.kotlin.setSrcDirs([])
+        }
+    }
 }
 
 dependencies {
@@ -42,5 +55,8 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.3.0'
     testCompile 'junit:junit:4.12'
+    testCompile 'org.jetbrains.kotlin:kotlin-stdlib:1.0.6'
+    testCompile 'org.jetbrains.kotlin:kotlin-test-junit:1.0.6'
+    testCompile "com.nhaarman:mockito-kotlin:1.5.0"
     apt 'com.jakewharton:butterknife-compiler:8.6.0'
 }

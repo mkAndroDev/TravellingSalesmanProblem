@@ -17,7 +17,7 @@ public class GraphPoint extends RealmObject {
     private double lon;
     private RealmList<AdjacencyPoint> adjacencyPoints;
 
-    GraphPoint(String name, double lat, double lng, RealmList<AdjacencyPoint> adjacencyPoints) {
+    public GraphPoint(String name, double lat, double lng, RealmList<AdjacencyPoint> adjacencyPoints) {
         this.name = name;
         this.lat = lat;
         this.lon = lng;

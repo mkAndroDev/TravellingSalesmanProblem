@@ -3,6 +3,7 @@ package com.krawczyk.maciej.travellingsalesmanproblem.android.fragments;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ import com.krawczyk.maciej.travellingsalesmanproblem.domain.presenters.MapFragme
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -150,7 +152,7 @@ public class MapFragment extends BaseFragment implements OnMapReadyCallback,
         mMap = googleMap;
 
         mMap.setOnMapLongClickListener(latLng -> {
-            String name = Utils.getAddress(getContext(), latLng);
+            String name = Utils.getAddress(new Geocoder(getContext(), Locale.getDefault()), latLng);
             points.add(new MapPoint(name, latLng));
             mMap.addMarker(new MarkerOptions().position(latLng).title(name));
         });

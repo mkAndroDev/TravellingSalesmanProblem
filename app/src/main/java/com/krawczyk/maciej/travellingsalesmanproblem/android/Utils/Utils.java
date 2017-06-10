@@ -19,8 +19,7 @@ import java.util.Locale;
  */
 public class Utils {
 
-    public static String getAddress(Context context, LatLng latLng) {
-        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+    public static String getAddress(Geocoder geocoder, LatLng latLng) {
         try {
             List<Address> addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
             Address address = addresses.get(0);
@@ -36,7 +35,6 @@ public class Utils {
         Route route = new Route();
 
         route.addPoint(graph.getPoints().first());
-
         GraphPoint graphPoint = graph.getPoints().first();
 
         for (int i = 0; i < graph.getPoints().size(); i++) {
@@ -72,9 +70,7 @@ public class Utils {
                 route.addDistance(adjacency.getWeight());
             }
         }
-
         return route;
-
     }
 
 }
